@@ -48,7 +48,7 @@ public class ManagerRankingForever : MonoBehaviour
 
     public async void GetRanking(bool _general)
     {
-        CanvasManager.LOG("1-GetRanking()", true);
+        CanvasManager.Log("1-GetRanking()", true);
         GetRanking(_general, 0);
     }
     public async void GetRanking(bool _general, int _days = 0)
@@ -87,7 +87,7 @@ public class ManagerRankingForever : MonoBehaviour
 
     public async Task<bool> GetRankingForever(bool _general, System.DateTime _date)
     {
-        CanvasManager.LOG("4-GetRankingForever()", true);
+        CanvasManager.Log("4-GetRankingForever()", true);
 
         bool success;
         string value;

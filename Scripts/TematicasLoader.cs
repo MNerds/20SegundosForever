@@ -7,26 +7,38 @@ public class TematicasLoader : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] private GameObject tematicaPrefab;
     [SerializeField] private Transform scrollPanel;
+    public static TematicasCategoryRootResponse tematicasCategoryRootResponse;
     private bool firstTime = true;
+
     private void OnEnable()
     {
         LimpiarPanel();
         LoadTematicas();
     }
 
+    bool loadingTematicas = false;
     private async void LoadTematicas()
     {
+        if (loadingTematicas)
+            return;
+        while (!gameObject.activeSelf)
+        {
+            await Task.Delay(10);
+        }
+        loadingTematicas = true;
         var _result = await MySqlManager.GetTematicasForever(false);
 
         if (_result.success)
         {
             CargarTematicas(_result.value);
-            GetComponentInChildren<SnapScrollRect>().StartScroll();
+
+            GetComponentInChildren<SnapScrollRect>(true).StartScroll();
         }
         else
         { 
             Debug.Log("Error al cargar las tematicas: " + _result.error);
         }
+        loadingTematicas = false;
     }
 
 
@@ -38,21 +50,26 @@ public class TematicasLoader : MonoBehaviour
             return;
         }
 
-        RootResponse response = JsonUtility.FromJson<RootResponse>(jsonData);
+        tematicasCategoryRootResponse = JsonUtility.FromJson<TematicasCategoryRootResponse>(jsonData);
 
-        Array.Sort(response.data.tematica, (a, b) =>
+        Array.Sort(tematicasCategoryRootResponse.data.tematica, (a, b) =>
         {
             DateTime fechaA = DateTime.Parse(a.fechaOn);
             DateTime fechaB = DateTime.Parse(b.fechaOn);
             return fechaA.CompareTo(fechaB);
         });
+
+
+
         bool _firstItem = true;
-        foreach (TematicaData tematica in response.data.tematica)
+        foreach (TematicaData tematica in tematicasCategoryRootResponse.data.tematica)
         {
+            if (!tematica.status.Equals("1"))
+                continue;
             GameObject item = Instantiate(tematicaPrefab, scrollPanel);
 
             TematicaItem uiItem = item.GetComponent<TematicaItem>();
-            if(_firstItem)
+            if(_firstItem && tematica.name.ToLower().Equals("20 segundos"))
             {
                 tematica.is20Seg = true;//null para 20 segundos
                 _firstItem = false;
@@ -76,6 +93,7 @@ public class TematicasLoader : MonoBehaviour
 
         private void LimpiarPanel()
     {
+        Debug.Log("***Limpiando panel de tematicas...");
         for (int i = scrollPanel.childCount - 1; i >= 0; i--)
         {
             Destroy(scrollPanel.GetChild(i).gameObject);
@@ -84,7 +102,7 @@ public class TematicasLoader : MonoBehaviour
 }
 
 [Serializable]
-public class RootResponse
+public class TematicasCategoryRootResponse
 {
     public string status;
     public string message;

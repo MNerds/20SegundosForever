@@ -69,11 +69,11 @@ public class TematicaItem : MonoBehaviour
     }
     public void SetBannerAlpha(float alpha)
     {
-        if (bannerTematica == null) return;
+        if (iconTematica == null) return;
 
-        Color c = bannerTematica.color;
+        Color c = iconTematica.color;
         c.a = alpha;
-        bannerTematica.color = c;
+        iconTematica.color = c;
     }
     public void SelectForever(bool _leaderBoard = false)
     {

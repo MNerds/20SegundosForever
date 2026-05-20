@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class SnapScrollRect : MonoBehaviour
+public class SnapScrollRect : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("Configuración de UI")]
     public ScrollRect scrollRect;
@@ -12,6 +13,9 @@ public class SnapScrollRect : MonoBehaviour
 
     [Header("Ajustes de Snap")]
     public float snapSpeed = 10f;
+
+    [Header("Swipe")]
+    public float swipePixels = 120f;
 
     [Header("Fade Banner")]
     public float fadeDistance = 0.25f;
@@ -31,6 +35,10 @@ public class SnapScrollRect : MonoBehaviour
     private List<Image> dots = new List<Image>();
 
     private bool isDragging = false;
+    private bool swipeConsumed = false;
+
+    private Vector2 dragStartPosition;
+
     private float[] itemPositions;
     private int currentIndex = 0;
 
@@ -44,31 +52,70 @@ public class SnapScrollRect : MonoBehaviour
     public void StartScroll()
     {
         // 1. Obtener todos los hijos del content
-
         items.Clear();
+
         foreach (RectTransform child in content)
         {
             items.Add(child);
+
+            // Agregamos automáticamente el forwarder al prefab/item
+            SnapScrollDragForwarder forwarder = child.GetComponent<SnapScrollDragForwarder>();
+
+            if (forwarder == null)
+            {
+                forwarder = child.gameObject.AddComponent<SnapScrollDragForwarder>();
+            }
+
+            forwarder.snapScrollRect = this;
         }
+
+        if (items.Count == 0)
+            return;
 
         Adjust();
 
         // 2. Calcular las posiciones normalizadas (0 a 1) para cada item
         itemPositions = new float[items.Count];
-        float distance = 1f / (items.Count - 1);
 
-        for (int i = 0; i < items.Count; i++)
+        if (items.Count == 1)
         {
-            itemPositions[i] = distance * i;
+            itemPositions[0] = 0f;
+            currentIndex = 0;
+        }
+        else
+        {
+            float distance = 1f / (items.Count - 1);
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                itemPositions[i] = distance * i;
+            }
         }
 
         CreateDots();
 
         // 3. Configurar botones
-        nextBtn.onClick.AddListener(() => Next());
-        prevBtn.onClick.AddListener(() => Previous());
+        if (nextBtn != null)
+        {
+            nextBtn.onClick.RemoveAllListeners();
+            nextBtn.onClick.AddListener(() => Next());
+        }
+
+        if (prevBtn != null)
+        {
+            prevBtn.onClick.RemoveAllListeners();
+            prevBtn.onClick.AddListener(() => Previous());
+        }
 
         enabled = true;
+
+        if (scrollRect != null)
+        {
+            scrollRect.velocity = Vector2.zero;
+        }
+
+        currentIndex = Mathf.Clamp(currentIndex, 0, items.Count - 1);
+        currentItem = items[currentIndex].gameObject;
 
         UpdateBannerFade();
         UpdateDots();
@@ -76,12 +123,18 @@ public class SnapScrollRect : MonoBehaviour
 
     private void OnDisable()
     {
-        nextBtn.onClick.RemoveAllListeners();
-        prevBtn.onClick.RemoveAllListeners();
+        if (nextBtn != null)
+            nextBtn.onClick.RemoveAllListeners();
+
+        if (prevBtn != null)
+            prevBtn.onClick.RemoveAllListeners();
     }
 
     public void ClearChildren(Transform panel)
     {
+        if (panel == null)
+            return;
+
         for (int i = panel.childCount - 1; i >= 0; i--)
         {
             Destroy(panel.GetChild(i).gameObject);
@@ -126,6 +179,9 @@ public class SnapScrollRect : MonoBehaviour
 
     public void Adjust()
     {
+        if (content == null || content.childCount == 0)
+            return;
+
         // 1. Obtenemos el ancho dinámico del ítem
         float itemWidth = content.GetChild(0).GetComponent<RectTransform>().rect.width;
 
@@ -141,7 +197,7 @@ public class SnapScrollRect : MonoBehaviour
 
         if (layout != null)
         {
-            totalWidth += layout.spacing * nItems;
+            totalWidth += (layout.spacing / 2) * nItems;
             totalWidth += layout.padding.left + layout.padding.right;
         }
 
@@ -151,7 +207,10 @@ public class SnapScrollRect : MonoBehaviour
 
     void Update()
     {
-        if (!isDragging && itemPositions != null)
+        if (scrollRect == null || itemPositions == null || itemPositions.Length == 0)
+            return;
+
+        if (!isDragging)
         {
             // Interpolar suavemente hacia la posición del item actual
             float targetPos = itemPositions[currentIndex];
@@ -162,7 +221,6 @@ public class SnapScrollRect : MonoBehaviour
                 Time.deltaTime * snapSpeed
             );
         }
-        else return;
 
         // Fade de banners según cercanía al centro
         UpdateBannerFade();
@@ -170,7 +228,7 @@ public class SnapScrollRect : MonoBehaviour
 
     private void UpdateBannerFade()
     {
-        if (items == null || items.Count == 0 || itemPositions == null)
+        if (items == null || items.Count == 0 || itemPositions == null || scrollRect == null)
             return;
 
         float currentScrollPos = scrollRect.horizontalNormalizedPosition;
@@ -194,64 +252,144 @@ public class SnapScrollRect : MonoBehaviour
         }
     }
 
-    // Se llama mediante el EventTrigger "EndDrag"
-    public void OnEndDrag()
+    public void OnBeginDrag(PointerEventData eventData)
     {
+        BeginSwipe(eventData.position);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        DragSwipe(eventData.position);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        EndSwipe();
+    }
+
+    public void BeginSwipe(Vector2 pointerPosition)
+    {
+        if (items == null || items.Count == 0)
+            return;
+
+        isDragging = true;
+        swipeConsumed = false;
+
+        dragStartPosition = pointerPosition;
+
+        if (scrollRect != null)
+            scrollRect.velocity = Vector2.zero;
+    }
+
+    public void DragSwipe(Vector2 pointerPosition)
+    {
+        if (!isDragging)
+            return;
+
+        if (swipeConsumed)
+            return;
+
+        if (items == null || items.Count == 0)
+            return;
+
+        float deltaX = pointerPosition.x - dragStartPosition.x;
+
+        if (Mathf.Abs(deltaX) < swipePixels)
+            return;
+
+        swipeConsumed = true;
         isDragging = false;
 
-        // Encontrar el item más cercano a la posición actual del scroll
-        float currentScrollPos = scrollRect.horizontalNormalizedPosition;
-        float closestDist = float.MaxValue;
+        if (scrollRect != null)
+            scrollRect.velocity = Vector2.zero;
 
-        for (int i = 0; i < itemPositions.Length; i++)
+        if (deltaX < 0f)
         {
-            float dist = Mathf.Abs(currentScrollPos - itemPositions[i]);
-
-            if (dist < closestDist)
-            {
-                closestDist = dist;
-                currentIndex = i;
-            }
+            // Swipe de derecha a izquierda = igual que presionar botón Next
+            if (nextBtn != null)
+                nextBtn.onClick.Invoke();
+            else
+                Next();
         }
+        else
+        {
+            // Swipe de izquierda a derecha = igual que presionar botón Previous
+            if (prevBtn != null)
+                prevBtn.onClick.Invoke();
+            else
+                Previous();
+        }
+
+        if (scrollRect != null)
+            scrollRect.velocity = Vector2.zero;
+    }
+
+    public void EndSwipe()
+    {
+        isDragging = false;
+        swipeConsumed = false;
+
+        if (scrollRect != null)
+            scrollRect.velocity = Vector2.zero;
 
         UpdateDots();
     }
 
-    // Se llama mediante el EventTrigger "BeginDrag"
-    public void OnBeginDrag()
-    {
-        isDragging = true;
-    }
-
     public void Next(bool _leaderboard = false)
     {
-        if (currentIndex < items.Count - 1)
-            currentIndex++;
+        if (items == null || items.Count == 0)
+            return;
+
+        currentIndex++;
+
+        if (currentIndex > items.Count - 1)
+            currentIndex = 0;
+
         UpdateItem(_leaderboard);
     }
 
     public void Previous(bool _leaderboard = false)
     {
-        if (currentIndex > 0)
-            currentIndex--;
+        if (items == null || items.Count == 0)
+            return;
+
+        currentIndex--;
+
+        if (currentIndex < 0)
+            currentIndex = items.Count - 1;
+
         UpdateItem(_leaderboard);
     }
 
     public void UpdateItem(bool _leaderboard)
     {
-        // Actualizar el GameObject actual para referencia externa
+        if (items == null || items.Count == 0)
+            return;
 
+        currentIndex = Mathf.Clamp(currentIndex, 0, items.Count - 1);
+
+        // Actualizar el GameObject actual para referencia externa
         currentItem = items[currentIndex].gameObject;
-        currentItem.GetComponent<TematicaItem>().SelectForever(_leaderboard);
+
+        TematicaItem tematicaItem = currentItem.GetComponent<TematicaItem>();
+
+        if (tematicaItem != null)
+        {
+            tematicaItem.SelectForever(_leaderboard);
+        }
 
         UpdateDots();
 
+        if (scrollRect != null)
+            scrollRect.velocity = Vector2.zero;
+
         if (_leaderboard)
         {
-            // if (manager == null)
+            manager = FindObjectOfType<ManagerRankingForever>();
+
+            if (manager != null)
             {
-                manager = FindObjectOfType<ManagerRankingForever>();
-                manager.OnEnable(); // acá tenés el objeto que lo contiene
+                manager.OnEnable();
             }
         }
     }

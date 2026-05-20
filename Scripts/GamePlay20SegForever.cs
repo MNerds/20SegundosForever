@@ -41,6 +41,7 @@ public class GamePlay20SegForever : MonoBehaviour
 
     [SerializeField] private VideoPlayer preview;
     [SerializeField] private VideoPlayer preview2;
+    [SerializeField] private Image preview3Custom;
     private bool alternatePreview = true;
     [SerializeField] private CategoryForever[] categories;
 
@@ -643,18 +644,25 @@ public class GamePlay20SegForever : MonoBehaviour
         pregunta.text = _pregunta.question;
 
         int offset = 0;
-        var cat = GetCategory(_pregunta.category);
-
-        if (cat != null)
+        if (IS20SEG)
         {
-            Debug.Log("Encontrado: " + cat.category);
-            setPreview(cat);
+            var cat = GetCategory(_pregunta.category);
+
+            if (cat != null)
+            {
+                Debug.Log("Encontrado: " + cat.category);
+                setPreview(cat);
+            }
+            else
+            {
+                Debug.Log("No se encontró la categoría");
+            }
         }
         else
         {
-            Debug.Log("No se encontró la categoría");
+            preview3Custom.overrideSprite = TEMATICA_BANNER;
         }
-
+        preview3Custom.transform.parent.gameObject.SetActive(!IS20SEG);
         if (_pregunta.options == null || _pregunta.options.Count == 0)
         {
             Debug.LogWarning("[Forever] Pregunta sin opciones: " + _pregunta._id);
@@ -678,6 +686,8 @@ public class GamePlay20SegForever : MonoBehaviour
 
     private CategoryForever GetCategory(string input)
     {
+        Debug.Log("****f Buscando " + input);
+
         if (!System.Enum.TryParse<CATEGORYFOREVER>(input, true, out var categoriaEnum))
         {
             return null;
@@ -876,6 +886,12 @@ public class GamePlay20SegForever : MonoBehaviour
         {
             RewardedAds.Instance.LoadAd();
         }
+    }
+
+    public void ShowEventsList()
+    {
+        PopUpManager.Instance.setText("", "", typePOPUP.OK, 0, false, typeMSJ.msjEventosForever, "", "", 100, false, false);
+
     }
 
     public void ShowPlayerStats()
