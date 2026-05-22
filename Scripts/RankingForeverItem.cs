@@ -19,7 +19,8 @@ public class RankingForeverItem : MonoBehaviour
         namePlayer_TMP.text = itemTMP.name;
         posPlayer_TMP.text = itemTMP.position.ToString();
         scorePlayer_TMP.text = itemTMP.streak.ToString();
-        iconPlayer.sprite = itemTMP.avatar <= 0 ? ManagerGame.Instance.avatarsList[UnityEngine.Random.Range(1, ManagerGame.Instance.avatarsList.Length)] : ManagerGame.Instance.avatarsList[itemTMP.avatar];
+        ProfileManager.ParseAvatarFecha(itemTMP.avatar, out int avatar, out DateTime fecha, out int fechaInt);
+        iconPlayer.sprite = avatar <= 0 ? ManagerGame.Instance.avatarsList[UnityEngine.Random.Range(1, ManagerGame.Instance.avatarsList.Length)] : ManagerGame.Instance.avatarsList[avatar];
         if(_isPlayer)
         {
             backGround_IMG.sprite = backGroundPlayer;

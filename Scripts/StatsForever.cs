@@ -25,7 +25,7 @@ public class StatsForever : MonoBehaviour
     {
         //await GamePlay20SegForever.GetPlayerData(true);
         userName_TMP.text = ManagerGame.gameDataPlayer.player.name;
-        int avatar = int.Parse(ManagerGame.gameDataPlayer.player.avatar);
+        int avatar = ManagerGame.gameDataPlayer.player.Avatar;
         userAvatar_IMG.sprite = avatar <= 0 ? ManagerGame.Instance.avatarsList[UnityEngine.Random.Range(1, ManagerGame.Instance.avatarsList.Length)] : ManagerGame.Instance.avatarsList[avatar];
         //gameTematica_IMG.sprite = GamePlay20SegForever.TEMATICA_BANNER;
         //gameTematicaLogo_IMG.sprite = GamePlay20SegForever.TEMATICA_ICON;
