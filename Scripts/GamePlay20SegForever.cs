@@ -91,6 +91,7 @@ public class GamePlay20SegForever : MonoBehaviour
     public static string TEMATICA_ID;
     public static string TEMATICA_NAME;
     public static string TEMATICA_DESC;
+    public static PriceEvent[] TEMATICA_PREMIOS;
     public static Sprite TEMATICA_ICON;
     public static Sprite TEMATICA_BANNER;
     public static bool IS20SEG;

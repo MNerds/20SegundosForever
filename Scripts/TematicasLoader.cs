@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEditor.U2D.ScriptablePacker;
 
 public class TematicasLoader : MonoBehaviour
 {
@@ -80,6 +81,7 @@ public class TematicasLoader : MonoBehaviour
                     tematica.id,
                     tematica.name,
                     tematica.desc,
+                    tematica.prize,
                     tematica.urlImg,
                     tematica.urlImgBanner,
                     tematica.status,
@@ -128,6 +130,7 @@ public class TematicaData
     public string fechaOff;
     public string status;
     public bool is20Seg;
+    public PriceEvent[] prize;
 }
 
 [Serializable]

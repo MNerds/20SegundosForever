@@ -16,6 +16,7 @@ public class TematicaItem : MonoBehaviour
     public string _id;
     private string _name;
     private string _descripcion;
+    private PriceEvent[] _premios;
     private string _iconUrl;
     private string _bannerUrl;
     private string _status;
@@ -27,7 +28,8 @@ public class TematicaItem : MonoBehaviour
         string id,
         string name,
         string descripcion,
-        string icon,
+        PriceEvent[] premios,
+    string icon,
         string banner,
         string status,
         bool is20Seg, 
@@ -37,6 +39,7 @@ public class TematicaItem : MonoBehaviour
         _id = id;
         _name = name;
         _descripcion = descripcion;
+        _premios = premios;
         _iconUrl = icon;
         _bannerUrl = banner;
         _status = status;
@@ -80,6 +83,7 @@ public class TematicaItem : MonoBehaviour
         GamePlay20SegForever.TEMATICA_ID = _id;
         GamePlay20SegForever.TEMATICA_NAME = _name;
         GamePlay20SegForever.TEMATICA_DESC = _descripcion;
+        GamePlay20SegForever.TEMATICA_PREMIOS = _premios;
         GamePlay20SegForever.TEMATICA_ICON= iconTematica.sprite;
         GamePlay20SegForever.TEMATICA_BANNER = bannerTematica.sprite;
         GamePlay20SegForever.IS20SEG= _is20Seg;
