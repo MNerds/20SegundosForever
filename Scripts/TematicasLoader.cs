@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEditor.U2D.ScriptablePacker;
 
 public class TematicasLoader : MonoBehaviour
 {
