@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class TematicasLoader : MonoBehaviour
     [SerializeField] private GameObject tematicaPrefab;
     [SerializeField] private Transform scrollPanel;
     public static TematicasCategoryRootResponse tematicasCategoryRootResponse;
+    public static bool loadCompleteTheme;
     private bool firstTime = true;
 
     private void OnEnable()
@@ -19,6 +21,7 @@ public class TematicasLoader : MonoBehaviour
     bool loadingTematicas = false;
     private async void LoadTematicas()
     {
+        loadCompleteTheme = false;
         if (loadingTematicas)
             return;
         while (!gameObject.activeSelf)
@@ -39,6 +42,7 @@ public class TematicasLoader : MonoBehaviour
             Debug.Log("Error al cargar las tematicas: " + _result.error);
         }
         loadingTematicas = false;
+        loadCompleteTheme = true;
     }
 
 
@@ -50,7 +54,7 @@ public class TematicasLoader : MonoBehaviour
             return;
         }
 
-        tematicasCategoryRootResponse = JsonUtility.FromJson<TematicasCategoryRootResponse>(jsonData);
+        tematicasCategoryRootResponse = JsonConvert.DeserializeObject<TematicasCategoryRootResponse>(jsonData);
 
         Array.Sort(tematicasCategoryRootResponse.data.tematica, (a, b) =>
         {

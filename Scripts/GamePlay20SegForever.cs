@@ -9,7 +9,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-
 public enum CATEGORYFOREVER
 {
     CulturaGeneral,
@@ -794,6 +793,11 @@ public class GamePlay20SegForever : MonoBehaviour
 
     public async Task<bool> GetCoinsRewards()
     {
+        while (!TematicasLoader.loadCompleteTheme)
+        {
+            await Task.Delay(100);
+        }
+        await AsignRewardsAsync();
         var _result = await MySqlManager.GetCoinsRewards();
 
         if (_result.success)
@@ -810,7 +814,46 @@ public class GamePlay20SegForever : MonoBehaviour
             return false;
         }
     }
+    public async Task AsignRewardsAsync()
+    {
+        var timeServer = await ClockServer.getTimeServer();
+        var _result = await MySqlManager.GetRankingDaily(TEMATICA_NAME, 10, timeServer.AddDays(1));
+        if (_result.success)
+        {
+            var rankingForeverList = JsonConvert.DeserializeObject<RankingDataForeverResponse>(_result.value).ranking;
+            RankingForeverPlayers player = rankingForeverList
+            .FirstOrDefault(r => r.playerId == ManagerGame.gameDataPlayer.player.idPlayer);
 
+            if (player != null)
+            {
+                if (player.position < TEMATICA_PREMIOS.Length)
+                {
+                    Debug.Log("[AsignRewards] coins" + TEMATICA_PREMIOS[player.position].NameNormal + " - " + TEMATICA_PREMIOS[player.position].coins);
+
+                    _result = await MySqlManager.setRewardsCoins(TEMATICA_ID, TEMATICA_PREMIOS[player.position - 1].coins, false);
+                    if (_result.success)
+                    {
+
+                    }
+                    else
+                    {
+                        Debug.Log("[AsignRewards] No se pudieron asignar las RewrdsCoins " + TEMATICA_PREMIOS[player.position].coins);
+
+                    }
+                }else 
+                {
+                    Debug.Log("[AsignRewards] No tiene premio, posicion: " + player.position +" < "+ TEMATICA_PREMIOS.Length);
+
+                }
+            }
+            else
+            {
+                Debug.Log("[AsignRewards] No se encontró el jugador en el ranking." + timeServer);
+            }
+
+            
+        }
+    }
     public async Task<bool> ClainCoinsRewards()
     {
         var _result = await MySqlManager.ClainCoinsRewards();
@@ -819,8 +862,8 @@ public class GamePlay20SegForever : MonoBehaviour
         {
             Debug.Log("Agregamos coins : " + _result.success + " - " + _result.value + " - count: ");
             CoinsResponse response = JsonUtility.FromJson<CoinsResponse>(_result.value);
-
-            ManagerGame.gameDataPlayer.player.Coins = (int.Parse(ManagerGame.gameDataPlayer.player.coins) + response.rewardsCoins).ToString();
+             
+            ManagerGame.gameDataPlayer.player.Coins = response.coins.ToString();
             rewardCoinsButon.SetActive(false);
             return true;
         }
@@ -933,7 +976,7 @@ public class GamePlay20SegForever : MonoBehaviour
         PopUpManager.Instance.setText("", "", typePOPUP.QUESTION, 0, true, typeMSJ.msjRewardsCoinsForever, "SI", "NO", coinsRewards.rewardsCoins, false, false);
         RewardsCoinsRewardsPopUp();
     }
-
+    
     public void RewardsCoinsRewardsPopUp()
     {
         _ = ClainCoinsRewards();

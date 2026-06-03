@@ -32,7 +32,7 @@ public class EventoForeverItem : MonoBehaviour
         urlImg = data.urlImg;
 
         // Descarga y asignación de imagen
-        iconoImage.overrideSprite = await PopUpManager.GetRemoteTexture(urlImg);
+        iconoImage.overrideSprite = await ImageCacheManager.GetRemoteTexture(urlImg);
     }
 
     public string GetUrlImg()

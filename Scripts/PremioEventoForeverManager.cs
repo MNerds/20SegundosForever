@@ -1,8 +1,10 @@
+using TMPro;
 using UnityEngine;
 
 public class PremioEventoForeverManager : MonoBehaviour
 {
     [Header("UI")]
+    [SerializeField] private TextMeshProUGUI descriptionThemeEvent;
     [SerializeField] private Transform content;
     [SerializeField] private PremioEventoForeverItem premioPrefab;
 
@@ -10,7 +12,7 @@ public class PremioEventoForeverManager : MonoBehaviour
     [SerializeField] private bool cargarAlIniciar = true;
     [SerializeField] private bool limpiarAntesDeCargar = true;
 
-    private void Start()
+    private void OnEnable()
     {
         if (cargarAlIniciar)
         {
@@ -38,6 +40,7 @@ public class PremioEventoForeverManager : MonoBehaviour
         }
 
         PriceEvent[] premios = GamePlay20SegForever.TEMATICA_PREMIOS;
+        descriptionThemeEvent.text = GamePlay20SegForever.TEMATICA_DESC;
 
         if (premios == null || premios.Length == 0)
         {
@@ -58,7 +61,7 @@ public class PremioEventoForeverManager : MonoBehaviour
             PremioEventoForeverItem item = Instantiate(premioPrefab, content);
             item.transform.SetSiblingIndex(i);
 
-            item.Configurar(premio, i);
+            item.ConfigurarAsync(premio, i);
         }
     }
 

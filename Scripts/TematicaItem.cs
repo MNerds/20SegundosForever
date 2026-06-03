@@ -46,8 +46,8 @@ public class TematicaItem : MonoBehaviour
         _is20Seg = is20Seg;
 
         Debug.Log($"Temática cargada: {name} - {id}");
-        iconTematica.sprite = await PopUpManager.GetRemoteTexture(_iconUrl);
-        bannerTematica.sprite = await PopUpManager.GetRemoteTexture(_bannerUrl);
+        iconTematica.sprite = await ImageCacheManager.GetRemoteTexture(_iconUrl);
+        bannerTematica.sprite = await ImageCacheManager.GetRemoteTexture(_bannerUrl);
 
         if (playButton)
         {

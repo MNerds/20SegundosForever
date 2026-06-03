@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Threading.Tasks;
 
 public class PremioEventoForeverItem : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class PremioEventoForeverItem : MonoBehaviour
     private PriceEvent premioData;
     private int index;
 
-    public void Configurar(PriceEvent premio, int index)
+    public async Task ConfigurarAsync(PriceEvent premio, int index)
     {
         this.premioData = premio;
         this.index = index;
@@ -32,16 +33,17 @@ public class PremioEventoForeverItem : MonoBehaviour
             posicionText.text = posicion.ToString();
 
         if (nombreText != null)
-            nombreText.text = premio.nameNormal;
+            nombreText.text = premio.DescriptionNormal;
 
         if (descripcionText != null)
-            descripcionText.text = premio.descriptionNormal;
+            descripcionText.text = premio.DescriptionNormal;
 
         if (precioText != null)
-            precioText.text = premio.priceNormal.ToString();
+            precioText.text = premio.priceNormal?.ToString();
 
         if (premioImage != null)
-            premioImage.sprite = null;
+            premioImage.sprite = await ImageCacheManager.GetRemoteTexture(premio.ImageNormal);
+        
 
         ConfigurarFondo(posicion);
     }

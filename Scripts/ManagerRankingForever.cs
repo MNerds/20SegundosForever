@@ -107,18 +107,12 @@ public class ManagerRankingForever : MonoBehaviour
         if (success)
         {
             rankingForeverList = JsonUtility.FromJson<RankingDataForeverResponse>(value);
-            // Accediendo a los datos
-            /*
-            foreach (var entry in rankingForeverList.ranking)
-            {
-                Debug.Log($"User {entry.userId} - Score: {entry.score}");
-            }*/
             showRanking();
             return true;
         }
         else
         {
-            Debug.Log("ERROR EN LA OBTENCION DE COIS: " + success + " - " + value);
+            Debug.Log("ERROR EN LA OBTENCION DE RANKING DIARIO: " + success + " - " + value);
             return false;
         }
     }
