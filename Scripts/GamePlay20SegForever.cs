@@ -65,7 +65,7 @@ public class GamePlay20SegForever : MonoBehaviour
     [SerializeField] private int maxLevel = 3;
 
     [Tooltip("Numero de preguntas descargada en cada consulta")]
-    [SerializeField] private int maxQuestionRequest = 10;
+    [SerializeField] private int maxQuestionRequest = 20;
 
     [SerializeField] private int segundosRespOk = 8;
     [SerializeField] private int segundosRespBad = 5;
@@ -84,7 +84,7 @@ public class GamePlay20SegForever : MonoBehaviour
     private readonly List<QuestionForeverData> bufferedQuestions = new List<QuestionForeverData>();
 
     private int _level = 1;
-    private int _category = 1;
+    private string _category = "";
     public static GamePlay20SegForever Instance;
 
     public static string TEMATICA_ID;
@@ -121,7 +121,7 @@ public class GamePlay20SegForever : MonoBehaviour
     {
         Instance = this;
         minQuestionToCaptcha = LoginManager.GetGlobalIntVar(GLOBALVARS.ForeverMinQuestionForCaptcha);
-        maxQuestionRequest = 10;
+        //maxQuestionRequest = 10;
     }
 
     public async void PlayGame()
@@ -132,7 +132,7 @@ public class GamePlay20SegForever : MonoBehaviour
             return;
         }
 
-        maxQuestionRequest = 10;
+        //maxQuestionRequest = 10;
         maxLevelQuestion = maxLevelQuestionFinal - 1;
         minQuestionsAfterFilter = Mathf.Max(1, maxLevelQuestion);
 
@@ -715,7 +715,7 @@ public class GamePlay20SegForever : MonoBehaviour
             _level = Random.Range(0, 10) < 5 ? maxLevel : maxLevel - 1;
         }
 
-        maxQuestionRequest = 10;
+        //maxQuestionRequest = 10;
 
         var _result = await MySqlManager.GetQuestions20SegForeverFilter(_level, maxQuestionRequest, _category, null, TEMATICA_NAME, true, _transition);
         Debug.Log("****ME TRAJO\n" + _result.value);
@@ -817,7 +817,7 @@ public class GamePlay20SegForever : MonoBehaviour
     public async Task AsignRewardsAsync()
     {
         var timeServer = await ClockServer.getTimeServer();
-        var _result = await MySqlManager.GetRankingDaily(TEMATICA_NAME, 10, timeServer.AddDays(1));
+        var _result = await MySqlManager.GetRankingDaily(TEMATICA_NAME, 10, timeServer.AddDays(-1));
         if (_result.success)
         {
             var rankingForeverList = JsonConvert.DeserializeObject<RankingDataForeverResponse>(_result.value).ranking;
@@ -833,6 +833,7 @@ public class GamePlay20SegForever : MonoBehaviour
                     _result = await MySqlManager.setRewardsCoins(TEMATICA_ID, TEMATICA_PREMIOS[player.position - 1].coins, false);
                     if (_result.success)
                     {
+                        Debug.Log("[AsignRewards] Se pudieron asignar las RewrdsCoins " + TEMATICA_PREMIOS[player.position].coins);
 
                     }
                     else
