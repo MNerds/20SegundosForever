@@ -48,7 +48,6 @@ public class ManagerRankingForever : MonoBehaviour
 
     public async void GetRanking(bool _general)
     {
-        CanvasManager.Log("1-GetRanking()", true);
         GetRanking(_general, 0);
     }
     public async void GetRanking(bool _general, int _days = 0)
@@ -68,6 +67,7 @@ public class ManagerRankingForever : MonoBehaviour
             _daysOffset = 0;
         }
         _daysOffset += _days;
+
 
         nextDailyRanking_BTN.SetActive(!(_daysOffset == 0 || _days == 0));
         prevDailyRanking_BTN.SetActive((_daysOffset > -LoginManager.GetGlobalIntVar(GLOBALVARS.ForeverMaxDaysRanking)));
