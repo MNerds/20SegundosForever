@@ -659,6 +659,7 @@ GameObject:
   - component: {fileID: 3733913355475483048}
   - component: {fileID: 3262758965602453777}
   - component: {fileID: 3686658333821891916}
+  - component: {fileID: 5122273899987155604}
   m_Layer: 5
   m_Name: Respustas Correctas (TMP)
   m_TagString: Untagged
@@ -713,7 +714,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Respuestas \ncorrectas"
+  m_text: Respuestas correctas
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a7cdd59bb7c1ec949b8769c1aa43f295, type: 2}
   m_sharedMaterial: {fileID: 3250838161603590807, guid: a7cdd59bb7c1ec949b8769c1aa43f295, type: 2}
@@ -785,6 +786,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5122273899987155604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740858420114869228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62d04c116210f06429c4b42d9b96a177, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  key: Respuestas_Correctas
 --- !u!1 &1349355178915816644
 GameObject:
   m_ObjectHideFlags: 0

@@ -884,7 +884,9 @@ public class GamePlay20SegForever : MonoBehaviour
     {
         if (isPlaying && _showPopUp)
         {
-            PopUpManager.Instance.setText("Atención", "Perderas el Ticket si abandonas la partida. ¿Salir?", typePOPUP.QUESTION, 5, true, typeMSJ.msj, "SI", "NO");
+            PopUpManager.Instance.setText(LocalizationManager.GetText(LocalizedKeys20Segundos.Atencion),
+                LocalizationManager.GetText(LocalizedKeys20Segundos.Abandonar_Forever), typePOPUP.QUESTION, 5, true, typeMSJ.msj,
+                LocalizationManager.GetText(LocalizedKeys20Segundos.Si), LocalizationManager.GetText(LocalizedKeys20Segundos.No));
 
             while (PopUpManager.Instance.isVisible())
             {
